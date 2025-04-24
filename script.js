@@ -54,7 +54,7 @@ function validateForm(event) { //Función para validar un formulario
 
     if (error) {
         alertIcon.className = "fas fa-exclamation-circle text-danger";
-        alertMsg.innerHTML = error;
+        alertMsg.textContent = error;
         msg.className = "alert alert-danger position-fixed top-0 end-0 mt-3 me-3 text-start shadow";
         msg.classList.remove("d-none");
         setTimeout(() => msg.classList.add("d-none"), 3000);
@@ -62,7 +62,7 @@ function validateForm(event) { //Función para validar un formulario
     } //Si se ha añadido el mensaje de error, se muestra la notificacion
     
     alertIcon.className = "fas fa-check-circle text-success";
-    alertMsg.innerHTML = `🎵 "${titulo}" de ${artista} añadida correctamente!`;
+    alertMsg.textContent = `🎵 "${titulo}" de ${artista} añadida correctamente!`;
     msg.className = "alert alert-success position-fixed top-0 end-0 mt-3 me-3 text-start shadow";
     msg.classList.remove("d-none");
     setTimeout(() => msg.classList.add("d-none"), 3000);
