@@ -33,7 +33,8 @@ h2 {
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: #0d6efd; /* Cambiado a color primary de Bootstrap */
+    background-color: #0d6efd;
+    /* Cambiado a color primary de Bootstrap */
     border-radius: 10px;
     border: 2px solid #f1f1f1;
 }
@@ -116,8 +117,30 @@ h2 {
     .album-art {
         height: 150px;
     }
-    
+
     #songs-list.song-grid {
         grid-template-columns: 1fr;
     }
+}
+
+.rating {
+    direction: rtl;
+    unicode-bidi: bidi-override;
+    display: inline-flex;
+    font-size: 3rem;
+}
+
+.rating input {
+    display: none;
+}
+
+.rating label {
+    color: #ccc;
+    cursor: pointer;
+}
+
+.rating input:checked~label,
+.rating label:hover,
+.rating label:hover~label {
+    color: gold;
 }

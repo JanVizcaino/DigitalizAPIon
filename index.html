@@ -36,17 +36,21 @@
                         <input type="text" id="artista" name="artista" class="form-control" required>
                     </div>
 
-                    <div class="form-group mb-3">
-                        <label for="genero" class="form-label text-primary">Género:</label>
-                        <select id="genero" name="genero" class="form-control" required>
-                            <option value="">Selecciona</option>
-                            <option value="Pop">Pop</option>
-                            <option value="Rock">Rock</option>
-                            <option value="Electrónica">Electrónica</option>
-                            <option value="Hip Hop">Hip Hop</option>
-                            <option value="Clásica">Clásica</option>
-                            <option value="Jazz">Jazz</option>
-                        </select>
+
+                    <div class="form-group mb-3 d-flex flex-column">
+                        <label for="puntuacion" class="form-label text-primary">Puntuación personal:</label>
+                        <div class="rating justify-content-end">
+                            <input type="radio" id="star5" name="puntuacion" value="5">
+                            <label for="star5">★</label>
+                            <input type="radio" id="star4" name="puntuacion" value="4">
+                            <label for="star4">★</label>
+                            <input type="radio" id="star3" name="puntuacion" value="3">
+                            <label for="star3">★</label>
+                            <input type="radio" id="star2" name="puntuacion" value="2">
+                            <label for="star2">★</label>
+                            <input type="radio" id="star1" name="puntuacion" value="1">
+                            <label for="star1">★</label>
+                        </div>                         
                     </div>
 
                     <div class="form-group mb-4">
