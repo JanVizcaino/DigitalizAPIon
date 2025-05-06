@@ -1,33 +1,52 @@
+let searchArray = [];
 const songsArray = [];
 
-document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("check-song").addEventListener("click", function (event) {
-        event.preventDefault();
-        if (!validateForm('check')) return;
-        checkSongJSONP();
-    });
+// Inicia los listeners al cargar el contenido
+function initEventListeners() {
+    const checkBtn = document.getElementById("check-song");
+    if (checkBtn) {
+        checkBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+            if (!validateForm('check')) return;
+            checkSongJSONP();
+        });
+    }
 
-    document.getElementById("add-song").addEventListener("click", function (event) {
-        event.preventDefault();
-        if (!validateForm('add')) return;
-        addSong();
-    });
+    const addBtn = document.getElementById("add-song");
+    if (addBtn) {
+        addBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+            if (!validateForm('add')) return;
+            addSong();
+        });
+    }
+}
 
-    document.getElementById('portada').addEventListener('change', previewImage);
-});
+// Cambia el contenido del body y reinicia los listeners
+function toggleBody(element) {
+    const url = element.getAttribute("data-url");
 
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            const contenido = html;
+            document.getElementById("main").innerHTML = contenido;
+            initEventListeners();
+        })
+        .catch(error => console.error("Error al cargar el contenido:", error));
+}
+
+// Obtiene los datos del formulario
 function getFormData() {
-    const file = document.getElementById('portada').files[0] || null;
-    const remoteMd5 = document.getElementById('portada').dataset.remote || null;
-
     return {
         titulo: document.getElementById('titulo').value.trim(),
         artista: document.getElementById('artista').value.trim(),
         puntuacion: document.querySelector('input[name="puntuacion"]:checked')?.value,
-        portada: file || remoteMd5
+        portada: document.getElementById('portada')?.dataset.remote || null
     };
 }
 
+// Valida los datos del formulario según el modo (check/add)
 function validateForm(mode) {
     const { titulo, artista, puntuacion, portada } = getFormData();
     let error = '';
@@ -36,9 +55,7 @@ function validateForm(mode) {
         if (!titulo) error = "El título es requerido";
         else if (!artista) error = "El artista es requerido";
         else if (!puntuacion) error = "Debes seleccionar una puntuación";
-        else if (!portada) error = "Debes subir una imagen de portada";
-        else if (portada instanceof File && portada.size > 5 * 1024 * 1024)
-            error = "La imagen es demasiado grande (Máx 5MB)";
+        else if (!portada) error = "No hay imagen remota de portada disponible";
     } else if (mode === 'check') {
         if (!titulo && !artista) error = "Debes completar al menos un campo para buscar";
     }
@@ -54,6 +71,7 @@ function validateForm(mode) {
     return true;
 }
 
+// Muestra un mensaje en pantalla (éxito o error)
 function showMessage(type, text) {
     const msg = document.getElementById("msg");
     const alertIcon = document.getElementById("alert-icon");
@@ -69,65 +87,101 @@ function showMessage(type, text) {
     setTimeout(() => msg.classList.add("d-none"), 3000);
 }
 
-function previewImage() {
-    const fileInput = document.getElementById('portada');
-    const previewContainer = document.getElementById('preview-container');
-    const previewImage = document.getElementById('preview-image');
+// Llama a la API de Deezer usando JSONP
+function checkSongJSONP() {
+    const { titulo, artista } = getFormData();
+    const parts = [];
+    if (titulo) parts.push(`track:"${titulo}"`);
+    if (artista) parts.push(`artist:"${artista}"`);
+    const query = encodeURIComponent(parts.join(' '));
 
-    if (fileInput.files && fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e => {
-            previewImage.src = e.target.result;
-            previewContainer.style.display = 'block';
-        };
-        reader.readAsDataURL(fileInput.files[0]);
+    const script = document.createElement('script');
+    script.src = `https://api.deezer.com/search?q=${query}&output=jsonp&callback=deezerCallback`;
+    script.onerror = () => showMessage('error', '😹😉 Error al cargar datos de Deezer.');
+    script.onload = () => document.body.removeChild(script);
+    document.body.appendChild(script);
+}
+
+// Callback que recibe datos desde Deezer
+function deezerCallback(response) {
+    if (response && response.data && response.data.length) {
+        searchArray = response.data.slice(0, 10);
+        fillResultData();
     } else {
-        previewContainer.style.display = 'none';
+        showMessage('error', 'No se encontró ningún resultado.');
     }
 }
 
+// Llena la lista de resultados con las canciones encontradas
+function fillResultData(){
+    const resultList = document.getElementById("results-list");
+    const emptyMsg = document.getElementById("empty-msg");
+    resultList.style.display = searchArray.length ? "flex" : "none";
+    emptyMsg.style.display = searchArray.length ? "none" : "flex";
+
+    resultList.innerHTML = searchArray.map((song, index) => `
+    <li class="d-flex justify-content-between align-items-center search-result">
+        <div class="d-flex align-items-center">
+            <p class="mb-0 me-5">#${index + 1}</p>
+            <div class="search-album-art">
+                <img src="https://e-cdns-images.dzcdn.net/images/cover/${song.md5_image}/500x500-000000-80-0-0.jpg" alt="${song.title}" class="album-cover">
+            </div>
+            <div class="search-song-info ms-3 mt-2">
+                <h5 class="text-primary">${song.title}</h5>
+                <p class="mb-1"><strong>Artista:</strong> ${song.artist.name}</p>
+            </div>
+        </div>
+        <i class="fa-solid fa-square-plus fs-4 text-secondary" onclick='fillFormData(${JSON.stringify(song.title)}, ${JSON.stringify(song.artist.name)}, ${JSON.stringify(song.md5_image)})'></i>
+    </li>
+    `).join('');
+}
+
+// Rellena el formulario con los datos de una canción seleccionada
+function fillFormData(titulo, artista, portada) {
+    document.getElementById('titulo').value = titulo;
+    document.getElementById('artista').value = artista;
+    if (typeof portada === 'string') {
+        const imgURL = `https://e-cdns-images.dzcdn.net/images/cover/${portada}/500x500-000000-80-0-0.jpg`;
+        document.getElementById('preview-image').src = imgURL;
+        document.getElementById('preview-container').style.display = 'flex';
+        document.getElementById('portada').dataset.remote = portada;
+    }
+}
+
+// Añade una canción al array de canciones
 function addSong() {
     const { titulo, artista, puntuacion, portada } = getFormData();
     const defaultCover = 'img/default-cover.png';
-    const newSong = { titulo, artista, puntuacion, portada: defaultCover, md5_image: null };
 
-    if (portada instanceof File) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const arrayBuffer = reader.result;
-            const spark = new SparkMD5.ArrayBuffer();
-            spark.append(arrayBuffer);
-            const hash = spark.end();
+    const newSong = {
+        titulo,
+        artista,
+        puntuacion,
+        portada: portada ? `https://e-cdns-images.dzcdn.net/images/cover/${portada}/500x500-000000-80-0-0.jpg` : defaultCover,
+        md5_image: portada
+    };
 
-            const base64Reader = new FileReader();
-            base64Reader.onloadend = () => {
-                newSong.portada = base64Reader.result;
-                newSong.md5_image = hash;
-                songsArray.push(newSong);
-                showSongs();
-                resetForm();
-            };
-            base64Reader.readAsDataURL(portada);
-        };
-        reader.readAsArrayBuffer(portada);
-    } else if (typeof portada === 'string') {
-        newSong.portada = `https://e-cdns-images.dzcdn.net/images/cover/${portada}/500x500-000000-80-0-0.jpg`;
-        newSong.md5_image = portada;
-        songsArray.push(newSong);
-        showSongs();
-        resetForm();
-    } else {
-        songsArray.push(newSong);
-        showSongs();
-        resetForm();
-    }
+    songsArray.push(newSong);
+    resetForm();
+    resetResultData();
 }
 
+// Reinicia el formulario tras añadir una canción
 function resetForm() {
     document.getElementById("formulario").reset();
-    document.getElementById("preview-container").style.display = 'none';
+    document.getElementById("preview-container").style.visibility = 'hidden';
+    document.getElementById("preview-image").src = '';
+    document.getElementById("portada").dataset.remote = '';
 }
 
+function resetResultData() {
+    const resultList = document.getElementById("results-list");
+    const emptyMsg = document.getElementById("empty-msg");
+    resultList.style.display = "none";
+    emptyMsg.style.display = "flex";
+}
+
+// Muestra la lista de canciones añadidas
 function showSongs() {
     const songsList = document.getElementById("songs-list");
     const emptyMsg = document.getElementById("empty-msg");
@@ -147,43 +201,9 @@ function showSongs() {
     songsArray.forEach(song => addRating(song.puntuacion, song.titulo));
 }
 
+// Añade estrellas según la puntuación
 function addRating(rating, title) {
     const id = document.getElementById('rating' + title);
     for (let i = 0; i < rating; i++) id.appendChild(document.createTextNode("★"));
     for (let i = rating; i < 5; i++) id.appendChild(document.createTextNode("☆"));
-}
-
-// JSONP callback para Deezer
-function deezerCallback(response) {
-    if (response && response.data && response.data.length) {
-        const first = response.data[0];
-        fillFormData(first.title, first.artist.name, first.md5_image);
-        showMessage('success', `🎵 "${first.title}" encontrada! 😹😉`);
-    } else {
-        showMessage('error', '😹😉 No se encontró ningún resultado.');
-    }
-}
-
-function checkSongJSONP() {
-    const { titulo, artista } = getFormData();
-    const parts = [];
-    if (titulo) parts.push(`track:"${titulo}"`);
-    if (artista) parts.push(`artist:"${artista}"`);
-    const query = encodeURIComponent(parts.join(' '));
-
-    const script = document.createElement('script');
-    script.src = `https://api.deezer.com/search?q=${query}&output=jsonp&callback=deezerCallback`;
-    script.onerror = () => showMessage('error', '😹😉 Error al cargar datos de Deezer.');
-    script.onload = () => document.body.removeChild(script);
-    document.body.appendChild(script);
-}
-
-function fillFormData(titulo, artista, portada) {
-    document.getElementById('titulo').value = titulo;
-    document.getElementById('artista').value = artista;
-    if (typeof portada === 'string') {
-        document.getElementById('preview-image').src = `https://e-cdns-images.dzcdn.net/images/cover/${portada}/500x500-000000-80-0-0.jpg`;
-        document.getElementById('preview-container').style.display = 'block';
-        document.getElementById('portada').dataset.remote = portada;
-    }
 }
