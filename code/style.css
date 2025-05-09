@@ -24,7 +24,7 @@ section {
     position: fixed;
     max-height: fit-content;
     top: 20px;
-    max-height: 70vh !important;
+    max-height: fit-content !important;
     background-color: #111827 !important; /* Fondo oscuro elegante */
     border-left: 1px solid rgba(255, 255, 255, 0.1); /* Línea sutil */
     box-shadow: inset 8px 0 16px -12px rgba(156, 163, 175, 0.1); /* Efecto de profundidad */
@@ -273,9 +273,14 @@ h2 {
 .rating-container-list {
     display: flex;
     align-items: center;
+    padding-right: 10px;
     flex-shrink: 0;
     width: 100px;
     justify-content: flex-end;
+}
+
+#preview-container{
+    padding-bottom: 1rem;
 }
 
 #preview-image {
@@ -294,11 +299,15 @@ h2 {
     }
 }
 
+.form-group{
+    height: 50px;
+}
+
 .rating {
     direction: rtl;
     unicode-bidi: bidi-override;
     display: inline-flex;
-    font-size: 3rem;
+    font-size: 2rem;
 }
 
 .rating input {

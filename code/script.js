@@ -1,10 +1,16 @@
 document.addEventListener("DOMContentLoaded",function(){
-    toggleModal()
-}
-);
+    toggleModal();
+
+    const currentPath = window.location.pathname;
+
+    if (!currentPath.endsWith("html/index.html")) {
+        const fakeElement = document.createElement("div");
+        fakeElement.setAttribute("data-url", "./html/index.html");
+        toggleBody(fakeElement);    }
+});
 
 let searchArray = [];
-const songsArray = [];
+let songsArray = JSON.parse(localStorage.getItem("cancion")) || [];
 
 // Inicia los listeners al cargar el contenido
 function initEventListeners() {
@@ -49,26 +55,26 @@ function initEventListeners() {
 // Cambia el contenido del body y reinicia los listeners
 function toggleBody(element) {
     const modalContainer = document.getElementById("modal-container");
-    const url = element.getAttribute("data-url");
+    const url = element.getAttribute("data-url"); //Añado el elemento de data-url para hacer el fetch a esa url
 
     fetch(url)
-        .then(response => response.text())
+        .then(response => response.text()) //Convierto la respuesta a texto
         .then(html => {
-            document.getElementById("main").innerHTML = html;
-            appendVideo();
+            document.getElementById("main").innerHTML = html; //Con el contenido, lo añado.
+            appendVideo(); //También le añado el video de fondo
 
-            if (url === `html/songslist.html`) {
-                const datosGuardados = localStorage.getItem("cancion");
+            if (url === `./html/songslist.html`) { //Si me encuentro en songslist.html
+                const datosGuardados = localStorage.getItem("cancion"); 
                 if (datosGuardados) {
                     const array = JSON.parse(datosGuardados);
                     songsArray.length = 0;
                     array.forEach(song => songsArray.push(song));
-                    showSongs();
+                    showSongs(); //Muestro las canciones
                 }
             }
 
-            appendModal(url);
-            initEventListeners();
+            appendModal(url); //También le añado el modal de filtrado / registro
+            initEventListeners(); //Y le añado los eventListeners correspondientes para cada botón.
 
         })
         .catch(error => console.error("Error:", error));
@@ -106,8 +112,10 @@ function validateRegisterForm(mode) {
         else if (!puntuacion) error = "Debes seleccionar una puntuación";
         else if (!portada) error = "No hay imagen remota de portada disponible";
 
-        if (array.some(cancion => cancion.titulo === titulo)) {
-            error = "Ya has añadido esta canción";
+        if (array){
+            if (array.some(cancion => cancion.titulo === titulo)) {
+                error = "Ya has añadido esta canción";
+            }
         }
 
     } else if (mode === 'check') {
@@ -142,13 +150,29 @@ function showMessage(type, text) {
     setTimeout(() => msg.classList.add("d-none"), 3000);
 }
 
-// Llama a la API de Deezer usando JSONP
 function checkSongJSONP() {
     const { titulo, artista } = getFormData('register');
     const parts = [];
-    if (titulo) parts.push(`track:"${titulo}"`);
-    if (artista) parts.push(`artist:"${artista}"`);
+
+    // Si el título está presente, lo agregamos al query
+    if (titulo && !artista) {
+        parts.push(`track:"${titulo}"`); // Solo busca por título si no hay artista
+    }
+
+    // Si el artista está presente, lo agregamos al query
+    if (artista && !titulo) {
+        parts.push(`artist:"${artista}"`); // Solo busca por artista si no hay título
+    }
+
+    // Si hay ambos, buscamos por título y artista
+    if (titulo && artista) {
+        parts.push(`track:"${titulo}" artist:"${artista}"`);
+    }
+
+    // Unimos las partes con un espacio
     const query = encodeURIComponent(parts.join(' '));
+
+    console.log(query);
 
     const script = document.createElement('script');
     script.src = `https://api.deezer.com/search?q=${query}&output=jsonp&callback=deezerCallback`;
@@ -200,7 +224,7 @@ function fillFormData(titulo, artista, portada) {
     if (typeof portada === 'string') {
         const imgURL = `https://e-cdns-images.dzcdn.net/images/cover/${portada}/500x500-000000-80-0-0.jpg`;
         document.getElementById('preview-image').src = imgURL;
-        document.getElementById('preview-container').style.display = 'flex';
+        document.getElementById("preview-container").style.display = 'flex';
         document.getElementById('portada').dataset.remote = portada;
     }
 }
@@ -208,7 +232,7 @@ function fillFormData(titulo, artista, portada) {
 // Añade una canción al array de canciones
 function addSong() {
     const { titulo, artista, puntuacion, portada } = getFormData('register');
-    const defaultCover = 'img/default-cover.png';
+    const defaultCover = './media/default-cover.png';
 
     const nextId = songsArray.length > 0
         ? Math.max(...songsArray.map(s => s.id ?? 0)) + 1
@@ -237,6 +261,8 @@ function resetForm(type) {
         document.getElementById("register-form").reset();
         document.getElementById("preview-container").style.visibility = 'hidden';
         document.getElementById("preview-image").src = '';
+        document.getElementById("preview-container").style.display = 'none';
+
         document.getElementById("portada").dataset.remote = '';
     } else if (type === 'filter') {
         document.getElementById('filter-form').reset();
@@ -348,29 +374,30 @@ function validateFilterForm() {
 }
 
 function fillFilterDataResult() {
-    const { titulo, artista, puntuacion } = getFormData('filter');
+    const { titulo, artista, puntuacion } = getFormData('filter'); //Coge la información del formulario de filtro
 
-    const datosGuardados = localStorage.getItem("cancion");
+    const datosGuardados = localStorage.getItem("cancion"); //convierte el localStorage la constante datos guardados
     if (!datosGuardados) return;
 
-    const array = JSON.parse(datosGuardados);
-    const filteredArray = array.filter(song => {
+    const array = JSON.parse(datosGuardados); //Convierte de JSON a Array la constante 
+    const filteredArray = array.filter(song => { //Uso la función filter para crear un array
         const matchesTitulo = !titulo || song.titulo.toLowerCase().includes(titulo.toLowerCase());
         const matchesArtista = !artista || song.artista.toLowerCase().includes(artista.toLowerCase());
-        const matchesPuntuacion = !puntuacion || song.puntuacion === puntuacion;
+        const matchesPuntuacion = !puntuacion || song.puntuacion === puntuacion; 
+        //Se comprueba si cada canción cumple con las condiciones del filtro
 
-        return matchesTitulo && matchesArtista && matchesPuntuacion;
+        return matchesTitulo && matchesArtista && matchesPuntuacion; //Devuelve true solo si la revision cumple las 3 condiciones. Esto hace que solo las que cumplan el filtro se guarden en el array.
     });
 
-    if (filteredArray.length === 0) {
+    if (filteredArray.length === 0) { //Si el array es igual a 0, no hay resultados
         showMessage("error", "No se han encontrado resultados");
-    } else {
+    } else { //Si el array es mayro, si que hay resultados
         showMessage("success", "Se han encontrado resultados");
-        songsArray.length = 0;
-        filteredArray.forEach(song => songsArray.push(song));
+        songsArray.length = 0; //Se vacía el array de canciones (el que las muestra)
+        filteredArray.forEach(song => songsArray.push(song)); //Y se llena con las canciones del filtro.
     }
 
-    showSongs();
+    showSongs(); //Posteriormente se llama a que se ejecuten las funciones
 }
 
 function resetFilterData() {
@@ -396,7 +423,7 @@ function appendVideo() {
     video.id = "backgroundVideo";
 
     const source = document.createElement("source");
-    source.src = "img/background.mp4";
+    source.src = "./media/background.mp4";
     source.type = "video/mp4";
 
     video.appendChild(source);
@@ -432,24 +459,22 @@ function appendModal(url) {
     let modal = document.createElement("div");
     modal.className = "form-container";
 
-    if (url === "html/register.html") {
+    if (url === "./html/register.html") {
         modal.innerHTML = `
-                    <p class="text-left">Añade tus canciones favoritas a la biblioteca.</p>
+                    <h5 class="text-left">Añade tus canciones favoritas.</h5>
+                    <p class="text-start">Pulsa en check para validar la canción y add para añadirla a tu bilioteca.</p>
 
                     <form class="form d-flex flex-column gap-2 justify-content-center" id="register-form">
-                        <div class="form-group mb-3 d-flex flex-column">
-                            <label for="titulo" class="form-label ">Título de la Canción:</label>
-                            <input type="text" id="titulo" name="titulo" class="form-control" required>
+                        <div class="form-group mb-3 d-flex flex-column justify-content-center">
+                            <input type="text" id="titulo" name="titulo" class="form-control" required placeholder="Título">
                         </div>
 
-                        <div class="form-group mb-3 d-flex flex-column">
-                            <label for="artista" class="form-label">Artista:</label>
-                            <input type="text" id="artista" name="artista" class="form-control" required>
+                        <div class="form-group mb-3 d-flex flex-column justify-content-center">
+                            <input type="text" id="artista" name="artista" class="form-control" required placeholder="Artista">
                         </div>
 
 
-                        <div class="form-group mb-3 d-flex flex-column">
-                            <label for="puntuacion" class="form-label ">Puntuación personal:</label>
+                        <div class="form-group mb-3 d-flex flex-column justify-content-center">
                             <div class="rating justify-content-end">
                                 <input type="radio" id="star5" name="puntuacion" value="5">
                                 <label for="star5">★</label>
@@ -464,11 +489,10 @@ function appendModal(url) {
                             </div>
                         </div>
 
-                        <div class="form-group mb-4">
-
+                        <div class="form-group justify-content-center" style="height: auto !important;">
                             <input type="hidden" id="portada" data-remote="">
                             <div id="preview-container" style="display: none;">
-                                <img id="preview-image" src="" alt="Previsualización de portada" />
+                                <img id="preview-image" src="./media/default-cover.png" alt="Previsualización de portada" />
                             </div>
 
                         </div>
@@ -485,23 +509,20 @@ function appendModal(url) {
                         </div>
 
                     </form>`;
-    } else if (url === "html/songslist.html") {
+    } else if (url === "./html/songslist.html") {
         modal.innerHTML = `
                     <p class="text-left">Busca y selecciona en los siguientes filtros.</p>
 
                     <form class="form d-flex flex-column gap-2 justify-content-center" id="filter-form">
-                        <div class="form-group mb-3 d-flex flex-column">
-                            <label for="titulo" class="form-label ">Título:</label>
-                            <input type="text" id="titulo-filter" name="titulo-filter" class="form-control" required>
+                        <div class="form-group mb-2 d-flex flex-column align-items-center justify-content-center">
+                            <input type="text" id="titulo-filter" name="titulo-filter" class="form-control" required placeholder="Titulo">
                         </div>
 
-                        <div class="form-group mb-3 d-flex flex-column">
-                            <label for="artista" class="form-label ">Artista:</label>
-                            <input type="text" id="artista-filter" name="artista-filter" class="form-control" required>
+                        <div class="form-group mb-2 d-flex flex-column align-items-center justify-content-center">
+                            <input type="text" id="artista-filter" name="artista-filter" class="form-control" required placeholder="Artista">
                         </div>
 
-                        <div class="form-group mb-3 d-flex flex-column">
-                            <label for="puntuacion-filter" class="form-label ">Punt.</label>
+                        <div class="form-group  mb-2  d-flex flex-column justify-content-center">
                             <div class="rating justify-content-end">
                                 <input type="radio" id="star-filter-5" name="puntuacion-filter" value="5">
                                 <label for="star-filter-5">★</label>
@@ -527,7 +548,7 @@ function appendModal(url) {
                         </div>
 
                     </form>`;
-    } else if (url === "html/index.html") {
+    } else if (url === "./html/index.html") {
                 modal.innerHTML = `
                     <p class="text-left mb-0">Pulsa en este botón en las otras páginas para interactuar con ellas.</p>`
     }
@@ -539,4 +560,6 @@ function appendModal(url) {
 
     modalToggler.removeEventListener("click", toggleModal);
     modalToggler.addEventListener("click", toggleModal);
+
+    modalToggler.click();
 }
