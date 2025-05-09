@@ -6,22 +6,155 @@
 
 body {
     font-family: 'Poppins', sans-serif !important;
+    position: relative;
+    z-index: 1;
+    color: #E5E5E5;
+    text-align: center;
 }
 
 main {
     flex: 1;
-    min-height: 85vh;
+    position: fixed;
+    top: 50%;
+    height: 100vh;
+    transform: translateY(-50%);
 }
 
 section {
-    border-left: 5px solid var(--bs-primary);
-    position: relative;
+    position: fixed;
     max-height: fit-content;
+    top: 20px;
+    max-height: 70vh !important;
+    background-color: #111827 !important; /* Fondo oscuro elegante */
+    border-left: 1px solid rgba(255, 255, 255, 0.1); /* Línea sutil */
+    box-shadow: inset 8px 0 16px -12px rgba(156, 163, 175, 0.1); /* Efecto de profundidad */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+section:hover {
+    border-left-color: rgba(99, 102, 241, 0.5); /* Cambio sutil al interactuar */
+    box-shadow: inset 8px 0 16px -8px rgba(99, 102, 241, 0.2);
+}
+
+#backgroundVideo {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    top: 0;
+    min-width: 100%;
+    min-height: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+header {
+    position: fixed;
+    top: 25px;
+    left: 24px;
+    width: 80px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px 0;
+    background: rgba(17, 24, 39, 0.6);
+    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+header:hover {
+    background: rgba(17, 24, 39, 0.8);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+header .nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 0;
+}
+
+header .nav-item {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+header .nav-link {
+    color: #E5E7EB;
+    font-size: 1.25rem;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    display: flex;
+    padding: 12px;
+}
+
+header .nav-link:hover{
+    color: #6366F1;
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+header .nav-item:hover {
+    background: rgba(99, 102, 241, 0.1);
+}
+
+#toggle-modal {
+    margin-bottom: 8px;
+}
+
+#toggle-modal i {
+    transition: transform 0.3s ease;
+}
+
+#toggle-modal:hover i {
+    transform: translateY(2px);
+}
+
+#modal-container {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    margin-left: 16px;
+    background: rgba(17, 24, 39, 0.95);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    min-width: 280px;
+    transform-origin: left center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+    z-index: 1001;
+}
+
+#modal-container.show {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+/* Mantén el form-container como está */
+.form-container {
+    position: relative; /* Cambiado de absolute a relative */
+    padding: 1rem;
+    border-radius: 8px;
+    width: 100%;
 }
 
 h1,
 h2 {
-    font-family: 'Orbitron', sans-serif !important;
+    font-family: 'Inter', sans-serif !important;
+    color: white !important;
 }
 
 ::-webkit-scrollbar {
@@ -33,10 +166,14 @@ h2 {
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: #0d6efd;
-    /* Cambiado a color primary de Bootstrap */
+    background-color: #7C3AED;
+    /* mismo morado para consistencia */
     border-radius: 10px;
     border: 2px solid #f1f1f1;
+}
+
+.hidden {
+    visibility: hidden;
 }
 
 .container-fluid {
@@ -46,15 +183,17 @@ h2 {
 }
 
 .form-label {
+    text-align: start !important;
     font-size: 1.2rem !important;
-    color: #1a1a1a !important;
+    color: #E5E5E5 !important;
 }
 
 .alert {
     backdrop-filter: blur(2px) !important;
-    background-color: rgba(255, 255, 255) !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
     z-index: 1000;
+    color: white;
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid rgba(124, 58, 237, 0.3) !important;
 }
 
 #msg {
@@ -63,48 +202,80 @@ h2 {
     gap: 8px;
 }
 
-/* Modificaciones CSS */
-#songs-list.song-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
+/**/
+
+#songs-list.song-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
     max-height: 70vh;
     overflow-y: auto;
-    padding: 1rem;
+    padding: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: #4B5563 #1F2937;
 }
 
-.song-card {
-    background: white;
-    border: 1px solid #dee2e6;
-    border-radius: 12px;
-    transition: transform 0.2s;
-    overflow: hidden;
+.song-card-list {
+    display: flex;
+    align-items: center;
+    background-color: #1F2937;
+    color: #E5E5E5;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    transition: background-color 0.3s ease;
+    border-left: 4px solid transparent;
     cursor: pointer;
 }
 
-.album-art {
-    height: 200px;
-    background: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.song-card-list:hover {
+    background-color: #374151;
+    border-left-color: #7C3AED;
+}
+
+.album-art-list {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    margin-right: 1rem;
     overflow: hidden;
 }
 
-.album-cover {
+.album-cover-list {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: top;
-    transition: transform 0.3s ease;
 }
 
-.song-card:hover .album-cover {
-    transform: scale(1.05);
+.song-info-list {
+    flex-grow: 1;
+    min-width: 0; /* Permite el truncado de texto */
+    padding-right: 1rem;
 }
 
-.search-song-info {
-    padding: 1rem;
+.song-info-list h5 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-info-list p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #9CA3AF;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rating-container-list {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    width: 100px;
+    justify-content: flex-end;
 }
 
 #preview-image {
@@ -135,40 +306,44 @@ h2 {
 }
 
 .rating label {
-    color: #ccc;
     cursor: pointer;
+    color: #6B7280; /* gris más suave */
 }
 
 .rating input:checked~label,
 .rating label:hover,
 .rating label:hover~label {
-    color: gold;
+    color: #FBBF24; /* amarillo dorado */
 }
 
-#results-list{
-    max-height: 100%;
+#results-list {
     overflow-y: auto;
+    padding-bottom: 40px;
+    max-height: 70vh !important;
 }
 
 .search-result {
+    
     align-items: center;
     padding: 10px 35px;
     margin-bottom: 10px;
-    background-color: #f8f9fa; /* color suave */
+    background-color: #1F2937;
+    color: white !important;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     transition: background-color 0.2s ease;
 }
 
 .search-result:hover {
-    background-color: #e9ecef; /* un poco más oscuro al pasar el ratón */
+    background-color: #374151;
+    /* un poco más oscuro al pasar el ratón */
 }
 
 .search-result p {
     margin-right: 15px;
     width: auto;
     text-align: left;
-    color: #6c757d;
+    color: #D1D5DB;
 }
 
 .search-album-art {
@@ -177,6 +352,7 @@ h2 {
     overflow: hidden;
     border-radius: 8px;
     flex-shrink: 0;
+    color: #D1D5DB;
 }
 
 .search-album-art img.album-cover {

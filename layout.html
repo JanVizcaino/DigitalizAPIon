@@ -16,29 +16,43 @@
 
 <body>
     <header class="text-white text-center ">
-        <div class="bg-primary m-0 py-4">
-            <h1 class="m-0"><i class="fas fa-music me-2"></i>Mi Biblioteca Musical</h1>
-        </div>
+        <ul class="nav justify-content-center">
+            <li class="nav-item" id="toggle-modal">
+                <a><i class="fa-solid fa-chevron-down"></i></a>
+            </li>
+            <div id="modal-container">
+                <div class="form-container">
+                    <p class="text-left mb-0">Pulsa en este botón en las otras páginas para interactuar con ellas.</p>
+                </div>
+            </div>
+        </ul>
         <ul class="nav justify-content-center">
             <li class="nav-item">
-                <a class="nav-link active" data-url="html/index.html" onclick="toggleBody(this)">Inicio</a>
+                <a class="nav-link active" data-url="html/index.html" onclick="toggleBody(this)"><i
+                        class="fa-solid fa-house"></i></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link active" data-url="html/register.html" onclick="toggleBody(this)">Registra tu canción</a>
+                <a class="nav-link active" data-url="html/register.html" onclick="toggleBody(this)"><i
+                        class="fa-solid fa-music"></i></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link active" data-url="html/songslist.html" onclick="toggleBody(this)">Biblioteca de canciones</a>
+                <a class="nav-link active" data-url="html/songslist.html" onclick="toggleBody(this)"><i
+                        class="fa-solid fa-bookmark"></i></a>
             </li>
-        </ui>
+        </ul>
     </header>
 
-    <main class="container-fluid bg-light pt-3 pb-3" id="main">
-        <h2>Bienvenido a tu biblioteca musical.</h2>
+    <main class="container-fluid pt-3 pb-3" id="main">
+        <div class="row justify-content-center gap-5">
+            <section class="col-12 col-md-6 mt-3 mt-md-0 rounded shadow p-4" style="max-width: 1000px;">
+                <h2>Bienvenido a tu biblioteca musical.</h2>
+            </section>
+        </div> <video autoplay muted loop id="backgroundVideo">
+            <source src="img/background.mp4" type="video/mp4">
+            Tu navegador no soporta videos HTML5.
+        </video>
     </main>
 
-    <footer class="text-center bg-primary text-white py-3 mt-auto">
-        <p class="mb-0">&copy; 2025 Mi Biblioteca Musical</p>
-    </footer>
 
     <div id="msg" class="alert d-none position-fixed top-0 end-0 mt-3 me-3 text-start shadow" role="alert">
         <i id="alert-icon" class="me-2"></i>

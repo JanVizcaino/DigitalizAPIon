@@ -1,62 +1,8 @@
 <div class="row justify-content-center gap-5">
-    <section class="col-12 col-md-6 mt-0 p-4 bg-white rounded shadow h-100" style="max-width: 500px;">
-        <h2 class="text-center mb-3 text-primary">Agregar Canción</h2>
-        <p class="text-left">Añade tus canciones favoritas a la biblioteca.</p>
-
-        <form class="form d-flex flex-column gap-2 justify-content-center" id="formulario">
-            <div class="form-group mb-3">
-                <label for="titulo" class="form-label text-primary">Título de la Canción:</label>
-                <input type="text" id="titulo" name="titulo" class="form-control" required>
-            </div>
-
-            <div class="form-group mb-3">
-                <label for="artista" class="form-label text-primary">Artista:</label>
-                <input type="text" id="artista" name="artista" class="form-control" required>
-            </div>
-
-
-            <div class="form-group mb-3 d-flex flex-column">
-                <label for="puntuacion" class="form-label text-primary">Puntuación personal:</label>
-                <div class="rating justify-content-end">
-                    <input type="radio" id="star5" name="puntuacion" value="5">
-                    <label for="star5">★</label>
-                    <input type="radio" id="star4" name="puntuacion" value="4">
-                    <label for="star4">★</label>
-                    <input type="radio" id="star3" name="puntuacion" value="3">
-                    <label for="star3">★</label>
-                    <input type="radio" id="star2" name="puntuacion" value="2">
-                    <label for="star2">★</label>
-                    <input type="radio" id="star1" name="puntuacion" value="1">
-                    <label for="star1">★</label>
-                </div>                         
-            </div>
-
-            <div class="form-group mb-4">
-
-                    <input type="hidden" id="portada" data-remote="">
-                    <div id="preview-container" style="display: none;">
-                        <img id="preview-image" src="" alt="Previsualización de portada" />
-                    </div>
-                    
-            </div>
-
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-secondary w-50" id="check-song">
-                    <i class="fa-solid fa-circle-check me-2"></i>Check song
-                </button>
-
-                </button>
-                <button type="submit" class="btn btn-primary w-50" id="add-song">
-                    <i class="fas fa-plus-circle me-2"></i>Add song
-                </button>
-            </div>
-
-        </form>
-    </section>
-    <section class="col-12 col-md-6 mt-3 mt-md-0 bg-white rounded shadow p-4" style="max-width: 1000px;">
-        <h2 class="text-center mb-3 text-primary">Resultados</h2>
+    <section class="col-12 col-md-6 mt-3 mt-md-0 rounded shadow p-4" style="max-width: 1000px;">
+        <h2 class="text-center mb-3 ">Resultados</h2>
         <ul id="results-list" class="p-3 mb-0 flex-column list-unstyled" style="display: none;">
-    
+
         </ul>
         <div class="flex-column align-items-center justify-content-center h-75" id="empty-msg"
             style="color: gray; display: flex; justify-content: center;">
